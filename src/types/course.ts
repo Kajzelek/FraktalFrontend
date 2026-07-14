@@ -13,6 +13,17 @@ export type Course = {
   canStart: boolean
 }
 
+export type AdminCourse = {
+  id: string
+  title: string
+  description: string
+  category: string
+  thumbnailUrl: string
+  price: number
+  published: boolean
+  createdAt: string
+}
+
 export type LessonContent = {
   id: string
   title: string

@@ -55,6 +55,28 @@ h3 {
   color: #64748b;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.header-actions a {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #17202a;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 10px;
+  text-decoration: none;
+}
+
+.header-actions a:hover {
+  border-color: #0f766e;
+  background: #ecfdf5;
+}
+
 button {
   border: 0;
   border-radius: 6px;
@@ -207,6 +229,16 @@ input:focus {
   height: 100%;
   border-radius: inherit;
   background: #0f766e;
+}
+
+.course-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.course-actions button {
+  flex: 1 1 130px;
 }
 
 .course-detail {
@@ -449,6 +481,69 @@ input:focus {
   background: #ecfdf5;
 }
 
+.payment-panel {
+  display: grid;
+  gap: 18px;
+  max-width: 560px;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.payment-panel p {
+  margin: 0;
+}
+
+.payment-result {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 12px;
+}
+
+.payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-page {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-table {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-course-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px 18px;
+}
+
+.admin-course-row p {
+  margin: 8px 0 12px;
+  color: #64748b;
+}
+
+.admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     width: min(100% - 24px, 1180px);
@@ -478,5 +573,26 @@ input:focus {
   .lesson-actions {
     justify-content: space-between;
     white-space: normal;
+  }
+
+  .payment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-course-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-row-actions {
+    justify-content: stretch;
+  }
+
+  .admin-row-actions button {
+    flex: 1 1 140px;
   }
 }

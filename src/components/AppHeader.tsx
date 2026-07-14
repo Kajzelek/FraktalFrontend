@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { UserProfile } from '../types/user'
 
 type AppHeaderProps = {
@@ -19,6 +20,10 @@ export function AppHeader({ user, onLogout }: AppHeaderProps) {
             {user.firstName} {user.lastName}
           </span>
           <small>{user.role === 'ROLE_ADMIN' ? 'Admin' : 'Student'}</small>
+          <div className="header-actions">
+            <Link to="/courses">Kursy</Link>
+            {user.role === 'ROLE_ADMIN' && <Link to="/admin/courses">Admin</Link>}
+          </div>
           <button type="button" onClick={onLogout}>
             Wyloguj
           </button>

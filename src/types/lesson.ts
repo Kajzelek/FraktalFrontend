@@ -28,6 +28,8 @@ export type LessonPlayer = {
   courseId: string
   previousLessonId: string | null
   nextLessonId: string | null
+  completed: boolean
+  completedAt: string | null
   primaryVideo: LessonMaterial | null
   primaryPdf: LessonMaterial | null
   materials: LessonMaterial[]

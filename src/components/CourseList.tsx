@@ -5,9 +5,10 @@ type CourseListProps = {
   courses: Course[]
   loading: boolean
   onOpenCourse: (courseId: string) => void
+  onBuyCourse: (courseId: string) => void
 }
 
-export function CourseList({ courses, loading, onOpenCourse }: CourseListProps) {
+export function CourseList({ courses, loading, onOpenCourse, onBuyCourse }: CourseListProps) {
   return (
     <section className="content-grid">
       <div className="section-heading">
@@ -22,7 +23,7 @@ export function CourseList({ courses, loading, onOpenCourse }: CourseListProps) 
       ) : (
         <div className="course-grid">
           {courses.map((course) => (
-            <CourseCard course={course} key={course.id} onOpen={onOpenCourse} />
+            <CourseCard course={course} key={course.id} onBuy={onBuyCourse} onOpen={onOpenCourse} />
           ))}
         </div>
       )}
