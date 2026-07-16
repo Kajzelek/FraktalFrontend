@@ -73,11 +73,11 @@ export type CourseStart = {
 
 export type ContinueLesson = {
   courseId: string
-  chapterId: string
-  chapterTitle: string
-  lessonId: string
-  lessonTitle: string
-  lessonPosition: number
+  chapterId: string | null
+  chapterTitle: string | null
+  lessonId: string | null
+  lessonTitle: string | null
+  lessonPosition: number | null
   free: boolean
   locked: boolean
   courseCompleted: boolean

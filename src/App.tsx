@@ -14,6 +14,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MockPaymentPage } from './pages/MockPaymentPage'
+import { OrdersPage } from './pages/OrdersPage'
 import './App.css'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/:courseId" element={<CourseDetailPage />} />
           <Route path="/lessons/:lessonId" element={<LessonPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
           <Route path="/payment/mock" element={<MockPaymentPage />} />
 
           <Route element={<AdminRoute />}>

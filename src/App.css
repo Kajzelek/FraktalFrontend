@@ -539,6 +539,11 @@ textarea:focus {
   gap: 22px;
 }
 
+.orders-page {
+  display: grid;
+  gap: 22px;
+}
+
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -584,6 +589,11 @@ textarea:focus {
   gap: 12px;
 }
 
+.orders-list {
+  display: grid;
+  gap: 12px;
+}
+
 .dashboard-course-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -595,6 +605,17 @@ textarea:focus {
 .dashboard-course-row p {
   margin: 8px 0 12px;
   color: #64748b;
+}
+
+.order-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid #dbe3ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 16px 18px;
 }
 
 .admin-page {
@@ -810,7 +831,8 @@ textarea:focus {
 
   .dashboard-stats,
   .dashboard-focus,
-  .dashboard-course-row {
+  .dashboard-course-row,
+  .order-row {
     grid-template-columns: 1fr;
   }
 

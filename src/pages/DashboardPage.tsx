@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCourseCatalog, getCourseStart } from '../api/courseApi'
+import { getContinueLesson, getCourseCatalog } from '../api/courseApi'
 import { useAuth } from '../auth/AuthContext'
-import type { Course } from '../types/course'
+import { DashboardCourseRow } from '../components/DashboardCourseRow'
+import { DashboardFocusCourse } from '../components/DashboardFocusCourse'
+import { DashboardStats } from '../components/DashboardStats'
+import type { ContinueLesson, Course } from '../types/course'
 
 export function DashboardPage() {
   const { token, user } = useAuth()
   const navigate = useNavigate()
   const [courses, setCourses] = useState<Course[]>([])
+  const [continueByCourseId, setContinueByCourseId] = useState<Record<string, ContinueLesson>>({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -20,9 +24,12 @@ export function DashboardPage() {
   const activeCourse = useMemo(
     () =>
       [...enrolledCourses]
-        .filter((course) => course.lessonsCount > 0)
+        .filter((course) => {
+          const nextLesson = continueByCourseId[course.id]
+          return course.lessonsCount > 0 && nextLesson && !nextLesson.locked && nextLesson.lessonId
+        })
         .sort((a, b) => b.progressPercent - a.progressPercent)[0] ?? null,
-    [enrolledCourses],
+    [continueByCourseId, enrolledCourses],
   )
   const completedLessons = enrolledCourses.reduce((sum, course) => sum + course.completedLessons, 0)
   const allLessons = enrolledCourses.reduce((sum, course) => sum + course.lessonsCount, 0)
@@ -33,7 +40,14 @@ export function DashboardPage() {
     setError('')
 
     try {
-      setCourses(await getCourseCatalog(token))
+      const catalog = await getCourseCatalog(token)
+      const enrolled = catalog.filter((course) => course.hasAccess)
+      const continueEntries = await Promise.all(
+        enrolled.map(async (course) => [course.id, await getContinueLesson(course.id, token)] as const),
+      )
+
+      setCourses(catalog)
+      setContinueByCourseId(Object.fromEntries(continueEntries))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie pobrac dashboardu.')
     } finally {
@@ -41,18 +55,15 @@ export function DashboardPage() {
     }
   }
 
-  async function startCourse(courseId: string) {
-    setLoading(true)
-    setError('')
+  function continueCourse(course: Course) {
+    const nextLesson = continueByCourseId[course.id]
 
-    try {
-      const start = await getCourseStart(courseId, token)
-      navigate(`/lessons/${start.lessonId}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udalo sie otworzyc lekcji.')
-    } finally {
-      setLoading(false)
+    if (!nextLesson?.lessonId || nextLesson.locked) {
+      navigate(`/courses/${course.id}`)
+      return
     }
+
+    navigate(`/lessons/${nextLesson.lessonId}`)
   }
 
   return (
@@ -64,36 +75,20 @@ export function DashboardPage() {
 
       {error && <div className="alert">{error}</div>}
 
-      <section className="dashboard-stats">
-        <article>
-          <span>Moje kursy</span>
-          <strong>{enrolledCourses.length}</strong>
-        </article>
-        <article>
-          <span>Ukonczone lekcje</span>
-          <strong>
-            {completedLessons}/{allLessons}
-          </strong>
-        </article>
-        <article>
-          <span>Sredni postep</span>
-          <strong>{averageProgress}%</strong>
-        </article>
-      </section>
+      <DashboardStats
+        enrolledCoursesCount={enrolledCourses.length}
+        completedLessons={completedLessons}
+        allLessons={allLessons}
+        averageProgress={averageProgress}
+      />
 
       {activeCourse && (
-        <section className="dashboard-focus">
-          <div>
-            <p className="eyebrow">Kontynuuj</p>
-            <h3>{activeCourse.title}</h3>
-            <p className="muted">
-              {activeCourse.completedLessons}/{activeCourse.lessonsCount} lekcji ukonczonych
-            </p>
-          </div>
-          <button type="button" disabled={loading} onClick={() => void startCourse(activeCourse.id)}>
-            Kontynuuj nauke
-          </button>
-        </section>
+        <DashboardFocusCourse
+          course={activeCourse}
+          description={getContinueDescription(activeCourse, continueByCourseId[activeCourse.id])}
+          loading={loading}
+          onContinue={continueCourse}
+        />
       )}
 
       <section className="content-grid">
@@ -109,27 +104,16 @@ export function DashboardPage() {
         ) : (
           <div className="dashboard-course-list">
             {enrolledCourses.map((course) => (
-              <article className="dashboard-course-row" key={course.id}>
-                <div>
-                  <h3>{course.title}</h3>
-                  <p>{course.category}</p>
-                  <div className="progress-row">
-                    <span>Postep</span>
-                    <strong>{Math.round(course.progressPercent)}%</strong>
-                  </div>
-                  <div className="progress-track">
-                    <div style={{ width: `${course.progressPercent}%` }} />
-                  </div>
-                </div>
-                <div className="admin-row-actions">
-                  <button type="button" className="secondary-button" onClick={() => navigate(`/courses/${course.id}`)}>
-                    Szczegoly
-                  </button>
-                  <button type="button" disabled={loading || !course.canStart} onClick={() => void startCourse(course.id)}>
-                    Kontynuuj
-                  </button>
-                </div>
-              </article>
+              <DashboardCourseRow
+                course={course}
+                description={getContinueDescription(course, continueByCourseId[course.id])}
+                actionLabel={getContinueButtonLabel(continueByCourseId[course.id])}
+                actionDisabled={!canUseCourseAction(course, continueByCourseId[course.id])}
+                loading={loading}
+                onOpenCourse={(courseId) => navigate(`/courses/${courseId}`)}
+                onAction={continueCourse}
+                key={course.id}
+              />
             ))}
           </div>
         )}
@@ -143,19 +127,51 @@ export function DashboardPage() {
           </div>
           <div className="dashboard-course-list">
             {availableCourses.slice(0, 3).map((course) => (
-              <article className="dashboard-course-row" key={course.id}>
-                <div>
-                  <h3>{course.title}</h3>
-                  <p>{course.category}</p>
-                </div>
-                <button type="button" className="secondary-button" onClick={() => navigate(`/courses/${course.id}`)}>
-                  Zobacz
-                </button>
-              </article>
+              <DashboardCourseRow
+                course={course}
+                onOpenCourse={(courseId) => navigate(`/courses/${courseId}`)}
+                key={course.id}
+              />
             ))}
           </div>
         </section>
       )}
     </section>
   )
+}
+
+function canUseCourseAction(course: Course, nextLesson: ContinueLesson | undefined) {
+  return course.lessonsCount > 0 && Boolean(nextLesson?.lessonId)
+}
+
+function getContinueDescription(course: Course, nextLesson: ContinueLesson | undefined) {
+  if (!nextLesson) {
+    return 'Sprawdzanie nastepnej lekcji...'
+  }
+
+  if (course.lessonsCount === 0 || !nextLesson.lessonId) {
+    return 'Kurs nie ma jeszcze lekcji.'
+  }
+
+  if (nextLesson.courseCompleted) {
+    return 'Kurs ukonczony.'
+  }
+
+  if (nextLesson.locked) {
+    return `Nastepna lekcja jest zablokowana: ${nextLesson.lessonTitle ?? 'lekcja'}`
+  }
+
+  return `Nastepna lekcja: ${nextLesson.lessonTitle ?? 'lekcja'}`
+}
+
+function getContinueButtonLabel(nextLesson: ContinueLesson | undefined) {
+  if (nextLesson?.courseCompleted) {
+    return 'Powtorz'
+  }
+
+  if (nextLesson?.locked) {
+    return 'Zobacz kurs'
+  }
+
+  return 'Kontynuuj'
 }
