@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { createChapter, deleteChapter, getCourseChapters, updateChapter } from '../api/chapterApi'
 import { getCourse } from '../api/courseApi'
 import { useAuth } from '../auth/AuthContext'
+import { AdminBreadcrumbs } from '../components/AdminBreadcrumbs'
 import { AdminChapterForm } from '../components/AdminChapterForm'
 import type { Chapter, ChapterFormRequest } from '../types/chapter'
 import type { AdminCourse } from '../types/course'
@@ -23,6 +24,7 @@ export function AdminChaptersPage() {
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (courseId) {
@@ -33,6 +35,7 @@ export function AdminChaptersPage() {
   async function loadData(id: string) {
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const [courseData, chapterList] = await Promise.all([getCourse(id, token), getCourseChapters(id, token)])
@@ -57,8 +60,10 @@ export function AdminChaptersPage() {
 
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
+      const editing = Boolean(editingChapterId)
       const saved = editingChapterId
         ? await updateChapter(editingChapterId, form, token)
         : await createChapter(courseId, form, token)
@@ -68,6 +73,7 @@ export function AdminChaptersPage() {
 
       setChapters(sortChapters(nextChapters))
       resetForm(nextChapters.length)
+      setSuccess(editing ? 'Rozdzial zostal zapisany.' : 'Rozdzial zostal dodany.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie zapisac rozdzialu.')
     } finally {
@@ -75,18 +81,28 @@ export function AdminChaptersPage() {
     }
   }
 
-  async function handleDelete(chapterId: string) {
+  async function handleDelete(chapter: Chapter) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunac rozdzial "${chapter.title}"? Tej operacji nie da sie cofnac.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
-      await deleteChapter(chapterId, token)
-      const nextChapters = chapters.filter((chapter) => chapter.id !== chapterId)
+      await deleteChapter(chapter.id, token)
+      const nextChapters = chapters.filter((item) => item.id !== chapter.id)
 
       setChapters(nextChapters)
-      if (editingChapterId === chapterId) {
+      if (editingChapterId === chapter.id) {
         resetForm(nextChapters.length)
       }
+      setSuccess('Rozdzial zostal usuniety.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie usunac rozdzialu.')
     } finally {
@@ -95,6 +111,7 @@ export function AdminChaptersPage() {
   }
 
   function startEdit(chapter: Chapter) {
+    setSuccess('')
     setEditingChapterId(chapter.id)
     setForm({
       title: chapter.title,
@@ -113,6 +130,13 @@ export function AdminChaptersPage() {
 
   return (
     <section className="admin-page">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Kursy', to: '/admin/courses' },
+          { label: course?.title ?? 'Rozdzialy' },
+        ]}
+      />
+
       <div className="admin-heading-row">
         <div className="section-heading">
           <p className="eyebrow">Admin</p>
@@ -125,6 +149,7 @@ export function AdminChaptersPage() {
       </div>
 
       {error && <div className="alert">{error}</div>}
+      {success && <div className="success-alert">{success}</div>}
 
       <AdminChapterForm
         value={form}
@@ -162,7 +187,7 @@ export function AdminChaptersPage() {
                 <button type="button" className="secondary-button" disabled={loading} onClick={() => startEdit(chapter)}>
                   Edytuj
                 </button>
-                <button type="button" disabled={loading} onClick={() => void handleDelete(chapter.id)}>
+                <button type="button" disabled={loading} onClick={() => void handleDelete(chapter)}>
                   Usun
                 </button>
               </div>

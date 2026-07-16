@@ -21,6 +21,7 @@ export function AppHeader({ user, onLogout }: AppHeaderProps) {
           </span>
           <small>{user.role === 'ROLE_ADMIN' ? 'Admin' : 'Student'}</small>
           <div className="header-actions">
+            <Link to="/dashboard">Panel</Link>
             <Link to="/courses">Kursy</Link>
             {user.role === 'ROLE_ADMIN' && <Link to="/admin/courses">Admin</Link>}
           </div>

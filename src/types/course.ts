@@ -61,3 +61,24 @@ export type CourseContent = {
   hasAccess: boolean
   chapters: ChapterContent[]
 }
+
+export type CourseStart = {
+  courseId: string
+  chapterId: string
+  chapterTitle: string
+  lessonId: string
+  lessonTitle: string
+  mode: string
+}
+
+export type ContinueLesson = {
+  courseId: string
+  chapterId: string
+  chapterTitle: string
+  lessonId: string
+  lessonTitle: string
+  lessonPosition: number
+  free: boolean
+  locked: boolean
+  courseCompleted: boolean
+}

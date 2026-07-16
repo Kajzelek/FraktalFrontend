@@ -10,6 +10,7 @@ import { AdminLessonMaterialsPage } from './pages/AdminLessonMaterialsPage'
 import { AdminLessonsPage } from './pages/AdminLessonsPage'
 import { CourseDetailPage } from './pages/CourseDetailPage'
 import { CoursesPage } from './pages/CoursesPage'
+import { DashboardPage } from './pages/DashboardPage'
 import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MockPaymentPage } from './pages/MockPaymentPage'
@@ -22,6 +23,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/:courseId" element={<CourseDetailPage />} />
           <Route path="/lessons/:lessonId" element={<LessonPage />} />
@@ -40,7 +42,7 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/courses" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
   )

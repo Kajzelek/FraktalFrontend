@@ -11,6 +11,7 @@ import {
   updateLessonMaterial,
 } from '../api/lessonApi'
 import { useAuth } from '../auth/AuthContext'
+import { AdminBreadcrumbs } from '../components/AdminBreadcrumbs'
 import { AdminLessonMaterialForm } from '../components/AdminLessonMaterialForm'
 import type { Chapter } from '../types/chapter'
 import type { AdminCourse } from '../types/course'
@@ -40,6 +41,7 @@ export function AdminLessonMaterialsPage() {
   const [editingMaterialId, setEditingMaterialId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (courseId && chapterId && lessonId) {
@@ -50,6 +52,7 @@ export function AdminLessonMaterialsPage() {
   async function loadData(selectedCourseId: string, selectedChapterId: string, selectedLessonId: string) {
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const [courseData, chapterList, lessonList, materialList] = await Promise.all([
@@ -82,9 +85,11 @@ export function AdminLessonMaterialsPage() {
 
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const request = normalizeRequest(form)
+      const editing = Boolean(editingMaterialId)
       const saved = editingMaterialId
         ? await updateLessonMaterial(editingMaterialId, request, token)
         : await createLessonMaterial(lessonId, request, token)
@@ -94,6 +99,7 @@ export function AdminLessonMaterialsPage() {
 
       setMaterials(sortMaterials(nextMaterials))
       resetForm(nextMaterials.length)
+      setSuccess(editing ? 'Material zostal zapisany.' : 'Material zostal dodany.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie zapisac materialu.')
     } finally {
@@ -101,18 +107,28 @@ export function AdminLessonMaterialsPage() {
     }
   }
 
-  async function handleDelete(materialId: string) {
+  async function handleDelete(material: LessonMaterial) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunac material "${material.title}"? Tej operacji nie da sie cofnac.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
-      await deleteLessonMaterial(materialId, token)
-      const nextMaterials = materials.filter((material) => material.id !== materialId)
+      await deleteLessonMaterial(material.id, token)
+      const nextMaterials = materials.filter((item) => item.id !== material.id)
 
       setMaterials(nextMaterials)
-      if (editingMaterialId === materialId) {
+      if (editingMaterialId === material.id) {
         resetForm(nextMaterials.length)
       }
+      setSuccess('Material zostal usuniety.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie usunac materialu.')
     } finally {
@@ -121,6 +137,7 @@ export function AdminLessonMaterialsPage() {
   }
 
   function startEdit(material: LessonMaterial) {
+    setSuccess('')
     setEditingMaterialId(material.id)
     setForm({
       title: material.title,
@@ -146,6 +163,15 @@ export function AdminLessonMaterialsPage() {
 
   return (
     <section className="admin-page">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Kursy', to: '/admin/courses' },
+          { label: course?.title ?? 'Rozdzialy', to: `/admin/courses/${courseId}/chapters` },
+          { label: chapter?.title ?? 'Lekcje', to: `/admin/courses/${courseId}/chapters/${chapterId}/lessons` },
+          { label: lesson?.title ?? 'Materialy' },
+        ]}
+      />
+
       <div className="admin-heading-row">
         <div className="section-heading">
           <p className="eyebrow">Admin</p>
@@ -164,6 +190,7 @@ export function AdminLessonMaterialsPage() {
       </div>
 
       {error && <div className="alert">{error}</div>}
+      {success && <div className="success-alert">{success}</div>}
 
       <AdminLessonMaterialForm
         value={form}
@@ -213,7 +240,7 @@ export function AdminLessonMaterialsPage() {
                 >
                   Edytuj
                 </button>
-                <button type="button" disabled={loading} onClick={() => void handleDelete(material.id)}>
+                <button type="button" disabled={loading} onClick={() => void handleDelete(material)}>
                   Usun
                 </button>
               </div>

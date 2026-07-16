@@ -1,5 +1,5 @@
 import { apiRequest } from './client'
-import type { AdminCourse, Course, CourseContent, CourseFormRequest } from '../types/course'
+import type { AdminCourse, ContinueLesson, Course, CourseContent, CourseFormRequest, CourseStart } from '../types/course'
 
 export function getCourseCatalog(token: string) {
   return apiRequest<Course[]>('/api/courses/catalog', token)
@@ -31,6 +31,12 @@ export function updateCourse(courseId: string, request: CourseFormRequest, token
   })
 }
 
+export function deleteCourse(courseId: string, token: string) {
+  return apiRequest<void>(`/api/admin/courses/${courseId}`, token, {
+    method: 'DELETE',
+  })
+}
+
 export function publishCourse(courseId: string, token: string) {
   return apiRequest<AdminCourse>(`/api/admin/courses/${courseId}/publish`, token, {
     method: 'PATCH',
@@ -41,4 +47,12 @@ export function unpublishCourse(courseId: string, token: string) {
   return apiRequest<AdminCourse>(`/api/admin/courses/${courseId}/unpublish`, token, {
     method: 'PATCH',
   })
+}
+
+export function getCourseStart(courseId: string, token: string) {
+  return apiRequest<CourseStart>(`/api/courses/${courseId}/start`, token)
+}
+
+export function getContinueLesson(courseId: string, token: string) {
+  return apiRequest<ContinueLesson>(`/api/courses/${courseId}/continue`, token)
 }

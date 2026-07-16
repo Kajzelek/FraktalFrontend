@@ -5,6 +5,7 @@ import { getCourseChapters } from '../api/chapterApi'
 import { getCourse } from '../api/courseApi'
 import { createLesson, deleteLesson, getChapterLessons, updateLesson } from '../api/lessonApi'
 import { useAuth } from '../auth/AuthContext'
+import { AdminBreadcrumbs } from '../components/AdminBreadcrumbs'
 import { AdminLessonForm } from '../components/AdminLessonForm'
 import type { Chapter } from '../types/chapter'
 import type { AdminCourse } from '../types/course'
@@ -31,6 +32,7 @@ export function AdminLessonsPage() {
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (courseId && chapterId) {
@@ -41,6 +43,7 @@ export function AdminLessonsPage() {
   async function loadData(selectedCourseId: string, selectedChapterId: string) {
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const [courseData, chapterList, lessonList] = await Promise.all([
@@ -71,9 +74,11 @@ export function AdminLessonsPage() {
 
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const request = normalizeRequest(form)
+      const editing = Boolean(editingLessonId)
       const saved = editingLessonId
         ? await updateLesson(editingLessonId, request, token)
         : await createLesson(chapterId, request, token)
@@ -83,6 +88,7 @@ export function AdminLessonsPage() {
 
       setLessons(sortLessons(nextLessons))
       resetForm(nextLessons.length)
+      setSuccess(editing ? 'Lekcja zostala zapisana.' : 'Lekcja zostala dodana.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie zapisac lekcji.')
     } finally {
@@ -90,18 +96,28 @@ export function AdminLessonsPage() {
     }
   }
 
-  async function handleDelete(lessonId: string) {
+  async function handleDelete(lesson: AdminLesson) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunac lekcje "${lesson.title}"? Tej operacji nie da sie cofnac.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
-      await deleteLesson(lessonId, token)
-      const nextLessons = lessons.filter((lesson) => lesson.id !== lessonId)
+      await deleteLesson(lesson.id, token)
+      const nextLessons = lessons.filter((item) => item.id !== lesson.id)
 
       setLessons(nextLessons)
-      if (editingLessonId === lessonId) {
+      if (editingLessonId === lesson.id) {
         resetForm(nextLessons.length)
       }
+      setSuccess('Lekcja zostala usunieta.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie usunac lekcji.')
     } finally {
@@ -110,6 +126,7 @@ export function AdminLessonsPage() {
   }
 
   function startEdit(lesson: AdminLesson) {
+    setSuccess('')
     setEditingLessonId(lesson.id)
     setForm({
       title: lesson.title,
@@ -133,6 +150,14 @@ export function AdminLessonsPage() {
 
   return (
     <section className="admin-page">
+      <AdminBreadcrumbs
+        items={[
+          { label: 'Kursy', to: '/admin/courses' },
+          { label: course?.title ?? 'Rozdzialy', to: `/admin/courses/${courseId}/chapters` },
+          { label: chapter?.title ?? 'Lekcje' },
+        ]}
+      />
+
       <div className="admin-heading-row">
         <div className="section-heading">
           <p className="eyebrow">Admin</p>
@@ -151,6 +176,7 @@ export function AdminLessonsPage() {
       </div>
 
       {error && <div className="alert">{error}</div>}
+      {success && <div className="success-alert">{success}</div>}
 
       <AdminLessonForm
         value={form}
@@ -207,7 +233,7 @@ export function AdminLessonsPage() {
                 <button type="button" className="secondary-button" disabled={loading} onClick={() => startEdit(lesson)}>
                   Edytuj
                 </button>
-                <button type="button" disabled={loading} onClick={() => void handleDelete(lesson.id)}>
+                <button type="button" disabled={loading} onClick={() => void handleDelete(lesson)}>
                   Usun
                 </button>
               </div>

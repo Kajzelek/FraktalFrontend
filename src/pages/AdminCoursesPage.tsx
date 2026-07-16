@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getAdminCourses, publishCourse, unpublishCourse } from '../api/courseApi'
+import { deleteCourse, getAdminCourses, publishCourse, unpublishCourse } from '../api/courseApi'
 import { useAuth } from '../auth/AuthContext'
 import type { AdminCourse } from '../types/course'
 
@@ -10,6 +10,7 @@ export function AdminCoursesPage() {
   const [courses, setCourses] = useState<AdminCourse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     void loadCourses()
@@ -18,6 +19,7 @@ export function AdminCoursesPage() {
   async function loadCourses() {
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       setCourses(await getAdminCourses(token))
@@ -31,6 +33,7 @@ export function AdminCoursesPage() {
   async function togglePublish(course: AdminCourse) {
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const updated = course.published
@@ -38,8 +41,33 @@ export function AdminCoursesPage() {
         : await publishCourse(course.id, token)
 
       setCourses((current) => current.map((item) => (item.id === updated.id ? updated : item)))
+      setSuccess(updated.published ? 'Kurs zostal opublikowany.' : 'Kurs zostal ukryty.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Nie udalo sie zmienic publikacji kursu.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDelete(course: AdminCourse) {
+    const confirmed = window.confirm(
+      `Czy na pewno chcesz usunac kurs "${course.title}"? Tej operacji nie da sie cofnac.`,
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      await deleteCourse(course.id, token)
+      setCourses((current) => current.filter((item) => item.id !== course.id))
+      setSuccess('Kurs zostal usuniety.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Nie udalo sie usunac kursu.')
     } finally {
       setLoading(false)
     }
@@ -58,6 +86,7 @@ export function AdminCoursesPage() {
       </div>
 
       {error && <div className="alert">{error}</div>}
+      {success && <div className="success-alert">{success}</div>}
 
       {loading && courses.length === 0 ? (
         <p className="muted">Ladowanie kursow...</p>
@@ -86,6 +115,14 @@ export function AdminCoursesPage() {
                   type="button"
                   className="secondary-button"
                   disabled={loading}
+                  onClick={() => navigate(`/courses/${course.id}`)}
+                >
+                  Podglad
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={loading}
                   onClick={() => navigate(`/admin/courses/${course.id}/chapters`)}
                 >
                   Rozdzialy
@@ -100,6 +137,9 @@ export function AdminCoursesPage() {
                 </button>
                 <button type="button" disabled={loading} onClick={() => void togglePublish(course)}>
                   {course.published ? 'Ukryj' : 'Opublikuj'}
+                </button>
+                <button type="button" disabled={loading} onClick={() => void handleDelete(course)}>
+                  Usun
                 </button>
               </div>
             </article>
