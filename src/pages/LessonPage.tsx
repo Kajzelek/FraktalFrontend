@@ -7,7 +7,7 @@ import type { LessonPlayer } from '../types/lesson'
 
 export function LessonPage() {
   const { lessonId } = useParams()
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const navigate = useNavigate()
   const [lesson, setLesson] = useState<LessonPlayer | null>(null)
   const [completed, setCompleted] = useState(false)
@@ -70,6 +70,7 @@ export function LessonPage() {
       lesson={lesson}
       loading={loading}
       completed={completed}
+      canTrackProgress={user?.role === 'ROLE_STUDENT'}
       onBack={() => navigate(`/courses/${lesson.courseId}`)}
       onComplete={() => void handleComplete()}
       onOpenLesson={(nextLessonId) => {

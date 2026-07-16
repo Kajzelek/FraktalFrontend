@@ -24,6 +24,14 @@ export type AdminCourse = {
   createdAt: string
 }
 
+export type CourseFormRequest = {
+  title: string
+  description: string
+  category: string
+  thumbnailUrl: string
+  price: number
+}
+
 export type LessonContent = {
   id: string
   title: string

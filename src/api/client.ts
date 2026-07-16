@@ -15,7 +15,17 @@ export async function apiRequest<T>(path: string, token: string, options: Reques
     throw new Error(message)
   }
 
-  return response.json() as Promise<T>
+  if (response.status === 204) {
+    return undefined as T
+  }
+
+  const body = await response.text()
+
+  if (!body) {
+    return undefined as T
+  }
+
+  return JSON.parse(body) as T
 }
 
 async function readErrorMessage(response: Response) {

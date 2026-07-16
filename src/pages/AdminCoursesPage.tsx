@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { getAdminCourses, publishCourse, unpublishCourse } from '../api/courseApi'
 import { useAuth } from '../auth/AuthContext'
 import type { AdminCourse } from '../types/course'
 
 export function AdminCoursesPage() {
   const { token } = useAuth()
+  const navigate = useNavigate()
   const [courses, setCourses] = useState<AdminCourse[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -45,9 +47,14 @@ export function AdminCoursesPage() {
 
   return (
     <section className="admin-page">
-      <div className="section-heading">
-        <p className="eyebrow">Admin</p>
-        <h2>Kursy</h2>
+      <div className="admin-heading-row">
+        <div className="section-heading">
+          <p className="eyebrow">Admin</p>
+          <h2>Kursy</h2>
+        </div>
+        <Link className="button-link" to="/admin/courses/new">
+          Dodaj kurs
+        </Link>
       </div>
 
       {error && <div className="alert">{error}</div>}
@@ -75,8 +82,21 @@ export function AdminCoursesPage() {
               </div>
 
               <div className="admin-row-actions">
-                <button type="button" className="secondary-button" disabled={loading}>
-                  Edytuj pozniej
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={loading}
+                  onClick={() => navigate(`/admin/courses/${course.id}/chapters`)}
+                >
+                  Rozdzialy
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={loading}
+                  onClick={() => navigate(`/admin/courses/${course.id}/edit`)}
+                >
+                  Edytuj
                 </button>
                 <button type="button" disabled={loading} onClick={() => void togglePublish(course)}>
                   {course.published ? 'Ukryj' : 'Opublikuj'}

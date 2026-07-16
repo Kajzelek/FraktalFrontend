@@ -40,3 +40,37 @@ export type LessonProgress = {
   completed: boolean
   completedAt: string | null
 }
+
+export type AdminLesson = {
+  id: string
+  title: string
+  description: string | null
+  position: number
+  videoUrl: string | null
+  pdfUrl: string | null
+  free: boolean
+  durationMinutes: number | null
+  chapterId: string
+}
+
+export type LessonFormRequest = {
+  title: string
+  description: string
+  position: number
+  videoUrl: string
+  pdfUrl: string
+  free: boolean
+  durationMinutes: number | null
+}
+
+export type LessonMaterialFormRequest = {
+  title: string
+  type: MaterialType
+  url: string | null
+  provider: MaterialProvider
+  providerAssetId: string | null
+  durationSeconds: number | null
+  thumbnailUrl: string | null
+  status: MaterialStatus
+  position: number
+}

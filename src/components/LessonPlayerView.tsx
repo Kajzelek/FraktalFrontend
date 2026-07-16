@@ -4,6 +4,7 @@ type LessonPlayerViewProps = {
   lesson: LessonPlayer
   loading: boolean
   completed: boolean
+  canTrackProgress: boolean
   onBack: () => void
   onComplete: () => void
   onOpenLesson: (lessonId: string | null) => void
@@ -13,6 +14,7 @@ export function LessonPlayerView({
   lesson,
   loading,
   completed,
+  canTrackProgress,
   onBack,
   onComplete,
   onOpenLesson,
@@ -23,9 +25,11 @@ export function LessonPlayerView({
         <button type="button" className="secondary-button" onClick={onBack}>
           Wroc do kursu
         </button>
-        <button type="button" onClick={onComplete} disabled={loading || completed}>
-          {completed ? 'Ukonczona' : 'Oznacz jako ukonczona'}
-        </button>
+        {canTrackProgress && (
+          <button type="button" onClick={onComplete} disabled={loading || completed}>
+            {completed ? 'Ukonczona' : 'Oznacz jako ukonczona'}
+          </button>
+        )}
       </div>
 
       <section className="player-layout">
@@ -70,9 +74,9 @@ export function LessonPlayerView({
           <h3>PDF i dodatki</h3>
         </div>
 
-        {lesson.primaryPdf?.url ? (
-          <a className="material-link" href={lesson.primaryPdf.url} target="_blank" rel="noreferrer">
-            Otworz PDF: {lesson.primaryPdf.title}
+        {lesson.primaryPdf?.url || lesson.pdfUrl ? (
+          <a className="material-link" href={lesson.primaryPdf?.url ?? lesson.pdfUrl ?? '#'} target="_blank" rel="noreferrer">
+            Otworz PDF: {lesson.primaryPdf?.title ?? 'Material lekcji'}
           </a>
         ) : (
           <p className="muted">Ta lekcja nie ma jeszcze PDF.</p>
@@ -109,6 +113,14 @@ function renderVideo(lesson: LessonPlayer) {
 
   if (lesson.primaryVideo?.status === 'FAILED') {
     return <div className="video-placeholder error-state">Nie udalo sie przetworzyc wideo.</div>
+  }
+
+  if (lesson.videoUrl) {
+    return (
+      <video controls>
+        <source src={lesson.videoUrl} />
+      </video>
+    )
   }
 
   return <div className="video-placeholder">Ta lekcja nie ma jeszcze wideo.</div>
