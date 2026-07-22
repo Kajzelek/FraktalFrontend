@@ -25,6 +25,8 @@ export function AppHeader({ user, onLogout }: AppHeaderProps) {
             <Link to="/courses">Kursy</Link>
             <Link to="/orders">Zakupy</Link>
             {user.role === 'ROLE_ADMIN' && <Link to="/admin/courses">Admin</Link>}
+            {user.role === 'ROLE_ADMIN' && <Link to="/admin/orders">Sprzedaz</Link>}
+            {user.role === 'ROLE_ADMIN' && <Link to="/admin/users">Uzytkownicy</Link>}
           </div>
           <button type="button" onClick={onLogout}>
             Wyloguj

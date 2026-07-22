@@ -9,3 +9,7 @@ export type UserProfile = {
   email: string
   role: Role
 }
+
+export type AdminUser = UserProfile & {
+  createdAt: string
+}

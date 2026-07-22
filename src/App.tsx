@@ -8,6 +8,8 @@ import { AdminCourseEditPage } from './pages/AdminCourseEditPage'
 import { AdminCoursesPage } from './pages/AdminCoursesPage'
 import { AdminLessonMaterialsPage } from './pages/AdminLessonMaterialsPage'
 import { AdminLessonsPage } from './pages/AdminLessonsPage'
+import { AdminOrdersPage } from './pages/AdminOrdersPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
 import { CourseDetailPage } from './pages/CourseDetailPage'
 import { CoursesPage } from './pages/CoursesPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -33,6 +35,8 @@ function App() {
 
           <Route element={<AdminRoute />}>
             <Route path="/admin/courses" element={<AdminCoursesPage />} />
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/courses/new" element={<AdminCourseCreatePage />} />
             <Route path="/admin/courses/:courseId/edit" element={<AdminCourseEditPage />} />
             <Route path="/admin/courses/:courseId/chapters" element={<AdminChaptersPage />} />
