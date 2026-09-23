@@ -148,6 +148,14 @@ export function AdminUsersPage() {
               </div>
 
               <div className="admin-row-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={loading}
+                  onClick={() => navigate(`/admin/users/${user.id}`)}
+                >
+                  Szczegoly
+                </button>
                 {user.role === 'ROLE_STUDENT' && (
                   <button
                     type="button"

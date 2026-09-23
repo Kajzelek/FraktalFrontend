@@ -1,5 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
+
+export class ApiError extends Error {
+  readonly status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+
 export async function apiRequest<T>(path: string, token: string, options: RequestInit = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -12,7 +24,7 @@ export async function apiRequest<T>(path: string, token: string, options: Reques
 
   if (!response.ok) {
     const message = await readErrorMessage(response)
-    throw new Error(message)
+    throw new ApiError(response.status, message)
   }
 
   if (response.status === 204) {

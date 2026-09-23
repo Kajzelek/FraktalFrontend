@@ -6,3 +6,7 @@ export function grantCourseAccess(userId: string, courseId: string, token: strin
     method: 'POST',
   })
 }
+
+export function getUserEnrollments(userId: string, token: string) {
+  return apiRequest<Enrollment[]>(`/api/admin/users/${userId}/enrollments`, token)
+}

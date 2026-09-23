@@ -24,9 +24,13 @@ type AuthProviderProps = {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY) ?? '')
+  const [token, setToken] = useState(
+    () => localStorage.getItem(TOKEN_STORAGE_KEY) ?? '',
+  )
   const [user, setUser] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(
+  () => Boolean(localStorage.getItem(TOKEN_STORAGE_KEY)),
+)
   const [error, setError] = useState('')
 
   useEffect(() => {
