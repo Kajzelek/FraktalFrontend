@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { getMe, login as loginRequest } from '../api/authApi'
-import type { LoginForm } from '../types/auth'
+import { getMe, login as loginRequest, register as registerRequest, } from '../api/authApi'
+import type { LoginForm, RegisterForm } from '../types/auth'
 import type { UserProfile } from '../types/user'
 
 const TOKEN_STORAGE_KEY = 'fraktal.authToken'
@@ -13,6 +13,7 @@ type AuthContextValue = {
   error: string
   isAuthenticated: boolean
   login: (form: LoginForm) => Promise<void>
+  register: (form: RegisterForm) => Promise<void>
   logout: () => void
   clearError: () => void
 }
@@ -75,6 +76,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function register(form: RegisterForm){
+    setLoading(true)
+    setError('')
+
+    try{
+      const auth = await registerRequest(form)
+      localStorage.setItem(TOKEN_STORAGE_KEY, auth.token)
+      setToken(auth.token)
+    }catch(err){
+      setError(
+        err instanceof Error 
+        ? err.message 
+        : 'Nie udalo sie utworzyc konta.',
+      ) 
+      throw err
+    } finally {
+      setLoading(false)
+    } 
+  }
+
   function logout() {
     localStorage.removeItem(TOKEN_STORAGE_KEY)
     setToken('')
@@ -89,6 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       error,
       isAuthenticated: Boolean(token),
       login,
+      register,
       logout,
       clearError: () => setError(''),
     }),

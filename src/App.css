@@ -352,7 +352,7 @@ textarea:focus {
   padding: 16px 18px;
 }
 
-.lesson-row + .lesson-row {
+.lesson-row+.lesson-row {
   border-top: 1px solid #eef2f7;
 }
 
@@ -639,7 +639,7 @@ textarea:focus {
   align-items: center;
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
+.breadcrumb-item+.breadcrumb-item::before {
   color: #94a3b8;
   content: "/";
 }
@@ -802,6 +802,17 @@ textarea:focus {
   gap: 10px;
   justify-content: flex-end;
   padding-top: 4px;
+}
+
+.auth-switch {
+  margin: 16px 0 0;
+  color: #5f6b7a;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: #087f5b;
+  font-weight: 700;
 }
 
 @media (max-width: 720px) {

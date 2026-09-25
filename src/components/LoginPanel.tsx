@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react'
 import type { LoginForm } from '../types/auth'
+import { Link } from 'react-router-dom'
 
 type LoginPanelProps = {
   form: LoginForm
@@ -43,6 +44,11 @@ export function LoginPanel({ form, loading, onFormChange, onSubmit }: LoginPanel
           {loading ? 'Logowanie...' : 'Zaloguj'}
         </button>
       </form>
+
+      <p className='auth-swtich'>
+        Nie masz jeszcze konta? <Link to="/register">Uwtorz konto</Link>
+      </p>
+
     </section>
   )
 }

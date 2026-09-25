@@ -18,6 +18,7 @@ import { LessonPage } from './pages/LessonPage'
 import { LoginPage } from './pages/LoginPage'
 import { MockPaymentPage } from './pages/MockPaymentPage'
 import { OrdersPage } from './pages/OrdersPage'
+import { RegisterPage } from './pages/RegisterPage'
 import './App.css'
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
