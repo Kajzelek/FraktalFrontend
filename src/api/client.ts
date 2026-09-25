@@ -41,10 +41,32 @@ export async function apiRequest<T>(path: string, token: string, options: Reques
 }
 
 async function readErrorMessage(response: Response) {
+
+  const fallbackMessage = 'Nie udalo sie wykonac operacji.'
+
   try {
-    const body = await response.json()
-    return body.message ?? 'Nie udalo sie wykonac operacji.'
+    const body: unknown = await response.json()
+
+    if (!body || typeof body !== 'object') {
+      return fallbackMessage
+    }
+
+    const errorData = body as Record<string, unknown>
+
+    if (typeof errorData.message === 'string') {
+      return errorData.message
+    }
+
+    const validationMessages = Object.values(errorData).filter(
+      (value): value is string => typeof value === 'string',
+    )
+
+    if (validationMessages.length > 0) {
+      return validationMessages.join(' ')
+    }
+
+    return fallbackMessage
   } catch {
-    return 'Nie udalo sie wykonac operacji.'
+    return fallbackMessage
   }
 }
